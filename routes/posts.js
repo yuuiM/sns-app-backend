@@ -1,15 +1,16 @@
 const router = require("express").Router();
 const Post = require("../models/Post");
+const User = require("../models/User");
 
 // 投稿を作成する
-router.post("/", async(req, res) => {
-    const newPost  = new Post(req, res);
-    try{
-        const savedPost = await newPost.save();
-        return res.status(200).json(savedPost);
-    }catch(err){
-        return res.status(500).json(err);
-    }
+router.post("/", async (req, res) => {
+  const newPost = new Post(req.body);
+  try {
+    const savedPost = await newPost.save();
+    res.status(200).json(savedPost);
+  } catch (err) {
+    res.status(500).json(err);
+  }
 });
 
 // 投稿を更新する
@@ -54,4 +55,24 @@ router.get("/:id", async(req, res) => {
     }
 });
 
+//特定の投稿にいいねを押す
+router.put("/:id/like", async (req, res) => {
+    try {
+      const post = await Post.findById(req.params.id);
+      //まだ投稿にいいねが押されていなかったら
+      if (!post.likes.includes(req.body.userId)) {
+        await post.updateOne({ $push: { likes: req.body.userId } });
+        res.status(200).json("The post has been liked");
+        //すでにいいねが押されていたら
+      } else {
+        //いいねしているユーザーを取り除く
+        await post.updateOne({ $pull: { likes: req.body.userId } });
+        res.status(200).json("The post has been disliked");
+      }
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  });
+
+//特定の投稿にいいねを押す
 module.exports = router;
