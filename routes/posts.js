@@ -44,7 +44,7 @@ router.put("/:id", async(req, res) => {
     }
 });
 
-// 投稿を取得する
+// 特定の投稿を取得する
 router.get("/:id", async(req, res) => {
     try{
         const post = await Post.findById(req.params.id);
